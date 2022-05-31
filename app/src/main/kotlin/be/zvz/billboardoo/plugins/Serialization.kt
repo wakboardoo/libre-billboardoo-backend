@@ -1,11 +1,16 @@
 package be.zvz.billboardoo.plugins
 
-import io.ktor.serialization.kotlinx.json.*
+import be.zvz.billboardoo.utils.JacksonUtils
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
 
 fun Application.configureSerialization() {
     install(ContentNegotiation) {
-        json()
+        jackson() {
+            registerKotlinModule()
+            registerModule(JacksonUtils.blackbirdModule)
+        }
     }
 }

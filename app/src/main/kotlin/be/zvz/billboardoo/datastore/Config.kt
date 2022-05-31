@@ -4,7 +4,6 @@ import be.zvz.billboardoo.utils.JacksonUtils
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
-import kotlinx.serialization.Serializable
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.SortedMap
@@ -84,24 +83,20 @@ object Config {
      *    }
      *  }
      */
-    @Serializable
     data class VideoData(
         val viewCount: MutableMap<String, CountData> // videoId -> CountData
     ) {
-        @Serializable
         data class CountData(
             val hourly: SortedMap<Long, Long>, // unix timestamp -> view count
             var allTime: Long
         )
     }
 
-    @Serializable
     data class ChartDetails(
         var chartInHours: Long = 0,
         var maxRank: RankDetails = RankDetails(),
         val previousRank: RankDetails = RankDetails()
     ) {
-        @Serializable
         data class RankDetails(
             var hourly: Int = 0,
             var twentyFourHour: Int = 0,

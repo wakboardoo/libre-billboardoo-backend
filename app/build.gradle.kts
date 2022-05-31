@@ -4,8 +4,6 @@ plugins {
     kotlin("jvm") version "1.6.21"
     application
 
-    kotlin("plugin.serialization").version("1.6.21")
-
     id("org.jmailen.kotlinter") version "3.10.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
@@ -26,7 +24,7 @@ dependencies {
     implementation(group = "io.ktor", name = "ktor-server-core", version = "2.0.2")
     implementation(group = "io.ktor", name = "ktor-server-netty", version = "2.0.2")
     implementation(group = "io.ktor", name = "ktor-server-content-negotiation", version = "2.0.2")
-    implementation(group = "io.ktor", name = "ktor-serialization-kotlinx-json", version = "2.0.2")
+    implementation(group = "io.ktor", name = "ktor-serialization-jackson", version = "2.0.2")
 
     implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.13.3")
     implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-blackbird", version = "2.13.3")
