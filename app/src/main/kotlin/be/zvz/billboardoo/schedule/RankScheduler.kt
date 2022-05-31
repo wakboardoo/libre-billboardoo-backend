@@ -122,6 +122,22 @@ object RankScheduler {
         }, { rankDetails, rank ->
             rankDetails.hourly = rank
         })
+        Rank.twentyFourHoursRank = getRankList(videoIdsToArtistAndTitleMap, {
+            val zonedDateTime = ZonedDateTime.ofInstant(
+                Instant.ofEpochSecond(timestamp),
+                timeZone
+            )
+                .minusDays(1)
+            val dayStartEpochSecond = zonedDateTime.toEpochSecond()
+            val dayEndEpochSecond = zonedDateTime.plusDays(1).toEpochSecond()
+            it.hourly.subMap(dayStartEpochSecond, dayEndEpochSecond + 1).values.sum()
+        }, { rankDetails, rank ->
+            rankDetails.twentyFourHour = max(rankDetails.twentyFourHour, rank)
+        }, {
+            Rank.twentyFourHoursRank
+        }, { rankDetails, rank ->
+            rankDetails.twentyFourHour = rank
+        })
         Rank.dailyRank = getRankList(videoIdsToArtistAndTitleMap, {
             val zonedDateTime = ZonedDateTime.ofInstant(
                 Instant.ofEpochSecond(timestamp),
@@ -136,7 +152,7 @@ object RankScheduler {
             val dayEndEpochSecond = zonedDateTime.plusDays(1).toEpochSecond()
             it.hourly.subMap(dayStartEpochSecond, dayEndEpochSecond).values.sum()
         }, { rankDetails, rank ->
-            rankDetails.daily = max(rankDetails.allTime, rank)
+            rankDetails.daily = max(rankDetails.daily, rank)
         }, {
             Rank.dailyRank
         }, { rankDetails, rank ->

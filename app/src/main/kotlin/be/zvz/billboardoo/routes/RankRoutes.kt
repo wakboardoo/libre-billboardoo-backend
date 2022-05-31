@@ -20,6 +20,9 @@ fun Route.rankRouting() {
                 get("/hourly") {
                     call.respondText(Json.encodeToString(Rank.hourlyRank), ContentType.Application.Json)
                 }
+                get("/24hours") {
+                    call.respondText(Json.encodeToString(Rank.twentyFourHoursRank), ContentType.Application.Json)
+                }
                 get("/daily") {
                     call.respondText(Json.encodeToString(Rank.dailyRank), ContentType.Application.Json)
                 }

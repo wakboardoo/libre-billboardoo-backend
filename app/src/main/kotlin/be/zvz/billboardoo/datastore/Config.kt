@@ -99,6 +99,7 @@ object Config {
         @Serializable
         data class RankDetails(
             var hourly: Int = 0,
+            var twentyFourHour: Int = 0,
             var daily: Int = 0,
             var weekly: Int = 0,
             var monthly: Int = 0,
