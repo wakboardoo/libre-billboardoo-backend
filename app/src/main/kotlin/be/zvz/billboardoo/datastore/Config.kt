@@ -1,5 +1,7 @@
 package be.zvz.billboardoo.datastore
 
+import com.google.common.cache.Cache
+import com.google.common.cache.CacheBuilder
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -7,16 +9,22 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.io.File
 import java.util.SortedMap
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalSerializationApi::class)
 object Config {
     val settings: Settings = File("settings.json").inputStream().buffered().use(Json::decodeFromStream)
     val targetVideos: TargetVideos = File("target_videos.json").inputStream().buffered().use(Json::decodeFromStream)
     val itemsData: ItemsData = File("items_data.json").inputStream().buffered().use(Json::decodeFromStream)
+    val newItems: Cache<String, Long> =
+        CacheBuilder.newBuilder() // videoIds -> CountData
+            .expireAfterWrite(7, TimeUnit.DAYS)
+            .build()
 
     @Serializable
     data class Settings(
-        val youtubeDataApiKey: String
+        val youtubeDataApiKey: String,
+        val secretKey: String
     )
 
     /**
@@ -30,7 +38,7 @@ object Config {
      */
     @Serializable
     data class TargetVideos(
-        val data: MutableMap<String, MutableMap<String, MutableList<String>>> // author -> (title -> videoIds)
+        val data: MutableMap<String, MutableMap<String, MutableList<String>>> // artist -> (title -> videoIds)
     )
 
     /**

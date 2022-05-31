@@ -34,6 +34,9 @@ fun Route.rankRouting() {
             get("/all-time") {
                 call.respondText(Json.encodeToString(Rank.allTimeRank), ContentType.Application.Json)
             }
+            get("/new") {
+                call.respondText(Json.encodeToString(Rank.newRank), ContentType.Application.Json)
+            }
         }
     }
 }

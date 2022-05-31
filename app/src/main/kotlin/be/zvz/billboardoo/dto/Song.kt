@@ -3,9 +3,8 @@ package be.zvz.billboardoo.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RankItem(
-    val videoId: String,
+data class Song(
     val artist: String,
     val title: String,
-    val count: Long
+    val videoIds: List<String>
 )

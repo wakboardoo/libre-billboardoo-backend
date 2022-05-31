@@ -9,4 +9,5 @@ object Rank {
     var monthlyRank: List<RankItem> = emptyList()
     var yearlyRank: List<RankItem> = emptyList()
     var allTimeRank: List<RankItem> = emptyList()
+    var newRank: List<RankItem> = emptyList()
 }
