@@ -2,51 +2,47 @@ package be.zvz.billboardoo.routes
 
 import be.zvz.billboardoo.datastore.Config
 import be.zvz.billboardoo.dto.Song
-import com.google.gson.Gson
-import com.google.gson.JsonObject
+import be.zvz.billboardoo.utils.JacksonUtils
 import guru.zoroark.ratelimit.rateLimited
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.Serializable
 import java.time.Duration
 
-private val gson = Gson()
+@Serializable
+data class SongResponse(
+    val result: Boolean,
+    val message: String
+)
 fun Route.songRouting() {
     route("/song") {
         put {
             if (call.request.header("Authorization") == Config.settings.secretKey) {
                 val songs = call.receive<List<Song>>()
                 songs.forEach {
-                    val tempMap = mutableMapOf<String, MutableList<String>>()
-                    val resultMap = Config.targetVideos.putIfAbsent(it.artist, tempMap) ?: tempMap
-                    val tempList = mutableListOf<String>()
-                    val resultList = resultMap.putIfAbsent(it.title, tempList) ?: tempList
-                    resultList.addAll(it.videoIds)
+                    Config.targetVideos.getOrPut(it.artist) {
+                        mutableMapOf()
+                    }.getOrPut(it.title) {
+                        mutableListOf()
+                    }.addAll(it.videoIds)
                     it.videoIds.forEach { videoId ->
                         Config.newItems.put(videoId, 0)
                     }
                 }
                 Config.Save.targetVideos()
                 call.respondText(
-                    gson.toJson(
-                        JsonObject().apply {
-                            addProperty("result", true)
-                            addProperty("message", "Songs added")
-                        }
+                    JacksonUtils.mapper.writeValueAsString(
+                        SongResponse(true, "Songs added")
                     ),
                     ContentType.Application.Json
                 )
             } else {
                 call.respondText(
-                    gson.toJson(
-                        JsonObject().apply {
-                            addProperty("result", false)
-                            addProperty("message", "Invalid secret key")
-                        }
+                    JacksonUtils.mapper.writeValueAsString(
+                        SongResponse(false, "Invalid secret key")
                     ),
                     ContentType.Application.Json,
                     HttpStatusCode.Unauthorized
@@ -62,7 +58,7 @@ fun Route.songRouting() {
                 val title = call.parameters["title"]
                 if (artist != null && title != null) {
                     call.respondText(
-                        Config.chartData[artist]?.get(title)?.let(Json::encodeToString) ?: "{}",
+                        Config.chartData[artist]?.get(title)?.let(JacksonUtils.mapper::writeValueAsString) ?: "{}",
                         ContentType.Application.Json
                     )
                 }
@@ -74,7 +70,7 @@ fun Route.songRouting() {
         ) {
             get("/target-videos") {
                 call.respondText(
-                    Json.encodeToString(Config.targetVideos),
+                    JacksonUtils.mapper.writeValueAsString(Config.targetVideos),
                     ContentType.Application.Json
                 )
             }
@@ -85,7 +81,7 @@ fun Route.songRouting() {
         ) {
             get("/chart-data") {
                 call.respondText(
-                    Json.encodeToString(Config.chartData),
+                    JacksonUtils.mapper.writeValueAsString(Config.chartData),
                     ContentType.Application.Json
                 )
             }

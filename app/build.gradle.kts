@@ -28,11 +28,15 @@ dependencies {
     implementation(group = "io.ktor", name = "ktor-server-content-negotiation", version = "2.0.2")
     implementation(group = "io.ktor", name = "ktor-serialization-kotlinx-json", version = "2.0.2")
 
+    implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.13.3")
+    implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-blackbird", version = "2.13.3")
+
     implementation(group = "com.github.JellyBrick", name = "ktor-rate-limit", version = "v0.0.4")
 
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.11")
 
     implementation(group = "com.google.apis", name = "google-api-services-youtube", version = "v3-rev20220515-1.32.1")
+    implementation(group = "com.google.http-client", name = "google-http-client-jackson2", version = "1.41.8")
 
     implementation(group = "com.coreoz", name = "wisp", version = "2.2.2")
     implementation(group = "com.cronutils", name = "cron-utils", version = "9.1.6")

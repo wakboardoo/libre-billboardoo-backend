@@ -5,7 +5,7 @@ import be.zvz.billboardoo.datastore.Rank
 import be.zvz.billboardoo.dto.RankItem
 import com.coreoz.wisp.schedule.cron.CronSchedule
 import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.gson.GsonFactory
+import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
 import org.slf4j.LoggerFactory
 import java.time.DayOfWeek
@@ -15,14 +15,15 @@ import java.util.TimeZone
 import kotlin.math.max
 
 object RankScheduler {
-    private val youtube = YouTube.Builder(NetHttpTransport(), GsonFactory(), null)
+    private val youtube = YouTube.Builder(NetHttpTransport(), JacksonFactory(), null)
         .setApplicationName("BillBodoo")
         .build()
     private val statisticsList = listOf("statistics")
     private val timeZone = TimeZone.getTimeZone("Asia/Seoul").toZoneId()
+    private val logger = LoggerFactory.getLogger(RankScheduler::class.java)
 
     fun init() {
-        LoggerFactory.getLogger(RankScheduler::class.java).info("Initializing RankScheduler")
+        logger.info("Initializing RankScheduler")
     }
 
     // TODO: 비효율적이지만 예쁜 데이터 저장 방법을 선택할 것인지,
@@ -31,16 +32,18 @@ object RankScheduler {
     private fun updateVideoCount(timestamp: Long) {
         Config.targetVideos.flatMap { (_, data) -> data.flatMap { (_, videoIds) -> videoIds } }
             .chunked(50)
-            .parallelStream()
             .forEach { chunk ->
                 val list = youtube.videos().list(statisticsList)
                 list.id = chunk
                 list.key = Config.settings.youtubeDataApiKey
                 list.execute().items.forEach { videoData ->
-                    Config.videoData.viewCount[videoData.id]?.let {
+                    Config.videoData.viewCount.getOrPut(videoData.id) {
+                        Config.VideoData.CountData(sortedMapOf(), 0)
+                    }.let {
                         val count = it.hourly.values.lastOrNull() ?: 0
-                        it.hourly[timestamp] = videoData.statistics.viewCount.toLong() - count
-                        it.allTime = count
+                        val viewCount = videoData.statistics.viewCount.toLong()
+                        it.hourly[timestamp] = viewCount - count
+                        it.allTime = viewCount
                     }
                 }
             }
@@ -80,11 +83,14 @@ object RankScheduler {
             }
             val index = this.indexOfFirst { it.artist == artist && it.title == title }
             if (index != -1) {
-                this[index].count += count
+                this[index].apply {
+                    this.videoIds.add(videoId)
+                    this.count += count
+                }
             } else {
                 add(
                     RankItem(
-                        videoId = videoId,
+                        videoIds = mutableListOf(videoId),
                         artist = artist,
                         title = title,
                         count = count
@@ -92,15 +98,11 @@ object RankScheduler {
                 )
             }
         }
-        sortBy(RankItem::count)
+        sortByDescending(RankItem::count)
         forEachIndexed { index, item ->
-            val tempMap = mutableMapOf<String, Config.ChartDetails>()
-            val tempChartDetails = Config.ChartDetails()
-            val resultChartDetails = (
-                Config.chartData
-                    .putIfAbsent(item.artist, tempMap) ?: tempMap
-                )
-                .putIfAbsent(item.title, tempChartDetails) ?: tempChartDetails
+            val resultChartDetails = Config.chartData
+                .getOrPut(item.artist) { mutableMapOf() }
+                .getOrPut(item.title) { Config.ChartDetails() }
             resultChartDetails.maxRank.apply {
                 maxRankProcessor(this, index + 1)
             }
@@ -244,22 +246,23 @@ object RankScheduler {
                 val (artist, title) = videoIdsToArtistAndTitleMap[videoId] ?: return@forEach
                 val count = Config.videoData.viewCount[videoId]?.hourly?.get(timestamp) ?: return@forEach
                 this.find { it.artist == artist && it.title == title }?.let {
+                    it.videoIds.add(videoId)
                     it.count += count
                     return@forEach
                 } ?: add(
                     RankItem(
-                        videoId = videoId,
+                        videoIds = mutableListOf(videoId),
                         artist = artist,
                         title = title,
                         count = count
                     )
                 )
             }
-            sortBy(RankItem::count)
+            sortByDescending(RankItem::count)
         }
     }
 
-    private fun apply() {
+    fun apply() {
         val timestamp = ZonedDateTime.now(timeZone).toEpochSecond()
         updateVideoCount(timestamp)
         updateRank(timestamp)
