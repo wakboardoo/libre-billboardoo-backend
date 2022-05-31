@@ -10,12 +10,52 @@ import kotlinx.serialization.json.decodeFromStream
 import java.io.File
 import java.util.SortedMap
 import java.util.concurrent.TimeUnit
+import kotlin.io.path.*
 
 @OptIn(ExperimentalSerializationApi::class)
 object Config {
-    val settings: Settings = File("settings.json").inputStream().buffered().use(Json::decodeFromStream)
-    val targetVideos: TargetVideos = File("target_videos.json").inputStream().buffered().use(Json::decodeFromStream)
-    val itemsData: ItemsData = File("items_data.json").inputStream().buffered().use(Json::decodeFromStream)
+    val settings: Settings = Path("settings.json").apply {
+        if (!exists()) {
+            createFile()
+        }
+        writeText(Json.encodeToString(Settings("", "")))
+    }.inputStream().buffered().use(Json::decodeFromStream)
+    /**
+     * {
+     *  "비챤": {
+     *    "취기를 빌려": ["videoId1", "videoId2"]
+     *  }
+     * }
+     */
+    val targetVideos: MutableMap<String, MutableMap<String, MutableList<String>>> = // artist -> (title -> videoIds)
+        Path("target_videos.json").apply {
+            if (!exists()) {
+                createFile()
+            }
+            writeText(Json.encodeToString(mutableMapOf<String, MutableMap<String, MutableList<String>>>()))
+        }.inputStream().buffered().use(Json::decodeFromStream)
+    private val automationPath = Path("automation").apply {
+        if (!exists()) {
+            createDirectory()
+        }
+    }
+    val videoData: VideoData = automationPath.resolve("video_data.json").apply {
+        if (!exists()) {
+            createFile()
+        }
+        writeText(Json.encodeToString(VideoData(mutableMapOf())))
+    }.inputStream().buffered().use(Json::decodeFromStream)
+    val chartData: MutableMap<String, MutableMap<String, ChartDetails>> = // artist -> (title -> (chart-in-hours))
+        automationPath.resolve("chart_data.json").apply {
+            if (!exists()) {
+                createFile()
+            }
+            writeText(
+                Json.encodeToString(
+                    mutableMapOf<String, MutableMap<String, ChartDetails>>()
+                )
+            )
+        }.inputStream().buffered().use(Json::decodeFromStream)
     val newItems: Cache<String, Long> =
         CacheBuilder.newBuilder() // videoIds -> CountData
             .expireAfterWrite(7, TimeUnit.DAYS)
@@ -25,20 +65,6 @@ object Config {
     data class Settings(
         val youtubeDataApiKey: String,
         val secretKey: String
-    )
-
-    /**
-     * {
-     *  "data": {
-     *    "비챤": {
-     *      "취기를 빌려": ["videoId1", "videoId2"]
-     *    }
-     *  }
-     * }
-     */
-    @Serializable
-    data class TargetVideos(
-        val data: MutableMap<String, MutableMap<String, MutableList<String>>> // artist -> (title -> videoIds)
     )
 
     /**
@@ -54,7 +80,7 @@ object Config {
      *  }
      */
     @Serializable
-    data class ItemsData(
+    data class VideoData(
         val viewCount: MutableMap<String, CountData> // videoId -> CountData
     ) {
         @Serializable
@@ -64,9 +90,27 @@ object Config {
         )
     }
 
+    @Serializable
+    data class ChartDetails(
+        val chartInHours: Long,
+        val maxRank: RankDetails,
+        val lastRank: RankDetails
+    ) {
+        @Serializable
+        data class RankDetails(
+            val hourly: Int,
+            val daily: Int,
+            val weekly: Int,
+            val monthly: Int,
+            val yearly: Int,
+            val allTime: Int
+        )
+    }
+
     object Save {
-        fun settings() = File("settings.json").bufferedWriter().write(Json.encodeToString(settings))
-        fun targetVideos() = File("target_videos.json").bufferedWriter().write(Json.encodeToString(targetVideos))
-        fun itemsData() = File("items_data.json").bufferedWriter().write(Json.encodeToString(itemsData))
+        fun settings() = File("settings.json").bufferedWriter().use { it.write(Json.encodeToString(settings)) }
+        fun targetVideos() = File("target_videos.json").bufferedWriter().use { it.write(Json.encodeToString(targetVideos)) }
+        fun videoData() = Path("automation").resolve("video_data.json").bufferedWriter().use { it.write(Json.encodeToString(videoData)) }
+        fun chartData() = Path("automation").resolve("chart_data.json").bufferedWriter().use { it.write(Json.encodeToString(chartData)) }
     }
 }

@@ -24,10 +24,10 @@ object RankScheduler {
     //  일단은 전자를 사용할 예정 (몇천개 정도 element로는 크게 부담되지 않기 때문)
     private fun updateVideoCount(timestamp: Long) {
         val list = youtube.videos().list(statisticsList)
-        list.id = Config.targetVideos.data.flatMap { (_, data) -> data.flatMap { (_, videoIds) -> videoIds } }
+        list.id = Config.targetVideos.flatMap { (_, data) -> data.flatMap { (_, videoIds) -> videoIds } }
         list.key = Config.settings.youtubeDataApiKey
         list.execute().items.forEach { videoData ->
-            Config.itemsData.viewCount[videoData.id]?.let {
+            Config.videoData.viewCount[videoData.id]?.let {
                 val count = it.hourly.values.lastOrNull() ?: 0
                 it.hourly[timestamp] = videoData.statistics.viewCount.toLong() - count
                 it.allTime = count
@@ -36,7 +36,7 @@ object RankScheduler {
     }
 
     private fun findArtistAndTitle(videoId: String): Pair<String, String>? {
-        Config.targetVideos.data.forEach { (artist, data) ->
+        Config.targetVideos.forEach { (artist, data) ->
             data.forEach { (title, videoIds) ->
                 if (videoIds.contains(videoId)) {
                     return Pair(artist, title)
@@ -48,9 +48,9 @@ object RankScheduler {
 
     private fun getRankList(
         videoIdsToArtistAndTitleMap: Map<String, Pair<String, String>>,
-        countProcessor: (Config.ItemsData.CountData) -> Long
+        countProcessor: (Config.VideoData.CountData) -> Long
     ): List<RankItem> = mutableListOf<RankItem>().apply {
-        Config.itemsData.viewCount.forEach { (videoId, data) ->
+        Config.videoData.viewCount.forEach { (videoId, data) ->
             val (artist, title) = videoIdsToArtistAndTitleMap[videoId] ?: return@forEach
             val count = countProcessor(data).let {
                 if (it == -1L) {
@@ -59,7 +59,10 @@ object RankScheduler {
                     it
                 }
             }
-            add(
+            this.find { it.artist == artist && it.title == title }?.let {
+                it.count += count
+                return@forEach
+            } ?: add(
                 RankItem(
                     videoId = videoId,
                     artist = artist,
@@ -73,11 +76,11 @@ object RankScheduler {
 
     private fun updateRank(timestamp: Long) {
         val videoIdsToArtistAndTitleMap = mutableMapOf<String, Pair<String, String>>().apply {
-            Config.itemsData.viewCount.forEach { (videoId, _) ->
+            Config.videoData.viewCount.forEach { (videoId, _) ->
                 put(videoId, findArtistAndTitle(videoId) ?: return@forEach)
             }
         }
-        Rank.allTimeRank = getRankList(videoIdsToArtistAndTitleMap, Config.ItemsData.CountData::allTime)
+        Rank.allTimeRank = getRankList(videoIdsToArtistAndTitleMap, Config.VideoData.CountData::allTime)
         Rank.hourlyRank = getRankList(videoIdsToArtistAndTitleMap) {
             it.hourly[timestamp] ?: -1L
         }
@@ -136,12 +139,16 @@ object RankScheduler {
         Rank.newRank = mutableListOf<RankItem>().apply {
             Config.newItems.asMap().forEach { (videoId, _) ->
                 val (artist, title) = videoIdsToArtistAndTitleMap[videoId] ?: return@forEach
-                add(
+                val count = Config.videoData.viewCount[videoId]?.hourly?.get(timestamp) ?: return@forEach
+                this.find { it.artist == artist && it.title == title }?.let {
+                    it.count += count
+                    return@forEach
+                } ?: add(
                     RankItem(
                         videoId = videoId,
                         artist = artist,
                         title = title,
-                        count = Config.itemsData.viewCount[videoId]?.hourly?.get(timestamp) ?: return@forEach
+                        count = count
                     )
                 )
             }
@@ -153,7 +160,7 @@ object RankScheduler {
         val timestamp = ZonedDateTime.now(timeZone).toEpochSecond()
         updateVideoCount(timestamp)
         updateRank(timestamp)
-        Config.Save.itemsData()
+        Config.Save.videoData()
     }
 
     init {

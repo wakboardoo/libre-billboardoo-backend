@@ -15,7 +15,7 @@ fun Route.songRouting() {
             if (call.request.header("Authorization") == Config.settings.secretKey) {
                 val songs = call.receive<List<Song>>()
                 songs.forEach {
-                    Config.targetVideos.data.putIfAbsent(it.artist, mutableMapOf())?.let { data ->
+                    Config.targetVideos.putIfAbsent(it.artist, mutableMapOf())?.let { data ->
                         data.putIfAbsent(it.title, mutableListOf())?.addAll(it.videoIds)
                     }
                     it.videoIds.forEach { videoId ->

@@ -7,5 +7,5 @@ data class RankItem(
     val videoId: String,
     val artist: String,
     val title: String,
-    val count: Long
+    var count: Long
 )
