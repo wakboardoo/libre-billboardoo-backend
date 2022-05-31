@@ -56,9 +56,9 @@ object Config {
         )
     }
 
-    fun save() {
-        File("settings.json").writeText(Json.encodeToString(settings))
-        File("target_videos.json").writeText(Json.encodeToString(targetVideos))
-        File("items_data.json").writeText(Json.encodeToString(itemsData))
+    object Save {
+        fun settings() = File("settings.json").bufferedWriter().write(Json.encodeToString(settings))
+        fun targetVideos() = File("target_videos.json").bufferedWriter().write(Json.encodeToString(targetVideos))
+        fun itemsData() = File("items_data.json").bufferedWriter().write(Json.encodeToString(itemsData))
     }
 }

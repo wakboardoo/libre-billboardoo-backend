@@ -125,6 +125,7 @@ object RankScheduler {
         val timestamp = ZonedDateTime.now(timeZone).toEpochSecond()
         updateVideoCount(timestamp)
         updateRank(timestamp)
+        Config.Save.itemsData()
     }
 
     init {
