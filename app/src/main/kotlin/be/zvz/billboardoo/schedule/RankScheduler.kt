@@ -11,6 +11,7 @@ import java.time.DayOfWeek
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.util.TimeZone
+import kotlin.math.max
 
 object RankScheduler {
     private val youtube = YouTube.Builder(NetHttpTransport(), GsonFactory(), null)
@@ -48,8 +49,16 @@ object RankScheduler {
 
     private fun getRankList(
         videoIdsToArtistAndTitleMap: Map<String, Pair<String, String>>,
-        countProcessor: (Config.VideoData.CountData) -> Long
+        countProcessor: (Config.VideoData.CountData) -> Long,
+        maxRankProcessor: (Config.ChartDetails.RankDetails, Int) -> Unit,
+        getPreviousRank: () -> List<RankItem>,
+        previousRankProcessor: (Config.ChartDetails.RankDetails, Int) -> Unit,
     ): List<RankItem> = mutableListOf<RankItem>().apply {
+        getPreviousRank().forEachIndexed { index, rankItem ->
+            Config.chartData[rankItem.artist]?.get(rankItem.title)?.previousRank?.let {
+                previousRankProcessor(it, index + 1)
+            }
+        }
         Config.videoData.viewCount.forEach { (videoId, data) ->
             val (artist, title) = videoIdsToArtistAndTitleMap[videoId] ?: return@forEach
             val count = countProcessor(data).let {
@@ -59,19 +68,36 @@ object RankScheduler {
                     it
                 }
             }
-            this.find { it.artist == artist && it.title == title }?.let {
-                it.count += count
-                return@forEach
-            } ?: add(
-                RankItem(
-                    videoId = videoId,
-                    artist = artist,
-                    title = title,
-                    count = count
+            val index = this.indexOfFirst { it.artist == artist && it.title == title }
+            if (index != -1) {
+                this[index].count += count
+            } else {
+                add(
+                    RankItem(
+                        videoId = videoId,
+                        artist = artist,
+                        title = title,
+                        count = count
+                    )
                 )
-            )
+            }
         }
         sortBy(RankItem::count)
+        forEachIndexed { index, item ->
+            val tempMap = mutableMapOf<String, Config.ChartDetails>()
+            val tempChartDetails = Config.ChartDetails()
+            val resultChartDetails = (
+                Config.chartData
+                    .putIfAbsent(item.artist, tempMap) ?: tempMap
+                )
+                .putIfAbsent(item.title, tempChartDetails) ?: tempChartDetails
+            resultChartDetails.maxRank.apply {
+                maxRankProcessor(this, index + 1)
+            }
+            if (index < 100) {
+                resultChartDetails.chartInHours++
+            }
+        }
     }
 
     private fun updateRank(timestamp: Long) {
@@ -80,12 +106,24 @@ object RankScheduler {
                 put(videoId, findArtistAndTitle(videoId) ?: return@forEach)
             }
         }
-        Rank.allTimeRank = getRankList(videoIdsToArtistAndTitleMap, Config.VideoData.CountData::allTime)
-        Rank.hourlyRank = getRankList(videoIdsToArtistAndTitleMap) {
+        Rank.allTimeRank = getRankList(videoIdsToArtistAndTitleMap, Config.VideoData.CountData::allTime, { rankDetails, rank ->
+            rankDetails.allTime = max(rankDetails.allTime, rank)
+        }, {
+            Rank.allTimeRank
+        }, { rankDetails, rank ->
+            rankDetails.allTime = rank
+        })
+        Rank.hourlyRank = getRankList(videoIdsToArtistAndTitleMap, {
             it.hourly[timestamp] ?: -1L
-        }
-        Rank.dailyRank = getRankList(videoIdsToArtistAndTitleMap) {
-            val dayStartEpochSecond = ZonedDateTime.ofInstant(
+        }, { rankDetails, rank ->
+            rankDetails.hourly = max(rankDetails.hourly, rank)
+        }, {
+            Rank.hourlyRank
+        }, { rankDetails, rank ->
+            rankDetails.hourly = rank
+        })
+        Rank.dailyRank = getRankList(videoIdsToArtistAndTitleMap, {
+            val zonedDateTime = ZonedDateTime.ofInstant(
                 Instant.ofEpochSecond(timestamp),
                 timeZone
             )
@@ -93,49 +131,88 @@ object RankScheduler {
                 .withMinute(0)
                 .withSecond(0)
                 .withNano(0)
-                .toEpochSecond()
-            it.hourly.tailMap(dayStartEpochSecond).values.sum()
-        }
-        Rank.weeklyRank = getRankList(videoIdsToArtistAndTitleMap) {
-            val weekStartEpochSecond = ZonedDateTime.ofInstant(
+                .minusDays(1)
+            val dayStartEpochSecond = zonedDateTime.toEpochSecond()
+            val dayEndEpochSecond = zonedDateTime.plusDays(1).toEpochSecond()
+            it.hourly.subMap(dayStartEpochSecond, dayEndEpochSecond).values.sum()
+        }, { rankDetails, rank ->
+            rankDetails.daily = max(rankDetails.allTime, rank)
+        }, {
+            Rank.dailyRank
+        }, { rankDetails, rank ->
+            rankDetails.daily = rank
+        })
+        Rank.weeklyRank = getRankList(videoIdsToArtistAndTitleMap, {
+            val zonedDateTime = ZonedDateTime.ofInstant(
                 Instant.ofEpochSecond(timestamp),
                 timeZone
             )
                 .with(DayOfWeek.MONDAY)
+                .minusWeeks(1)
                 .withHour(0)
                 .withMinute(0)
                 .withSecond(0)
                 .withNano(0)
+            val weekStartEpochSecond = zonedDateTime
                 .toEpochSecond()
-            it.hourly.tailMap(weekStartEpochSecond).values.sum()
-        }
-        Rank.monthlyRank = getRankList(videoIdsToArtistAndTitleMap) {
-            val monthStartEpochSecond = ZonedDateTime.ofInstant(
+            val weekEndEpochSecond = zonedDateTime
+                .plusWeeks(1)
+                .toEpochSecond()
+            it.hourly.subMap(weekStartEpochSecond, weekEndEpochSecond).values.sum()
+        }, { rankDetails, rank ->
+            rankDetails.weekly = max(rankDetails.weekly, rank)
+        }, {
+            Rank.weeklyRank
+        }, { rankDetails, rank ->
+            rankDetails.weekly = rank
+        })
+        Rank.monthlyRank = getRankList(videoIdsToArtistAndTitleMap, {
+            val zonedDateTime = ZonedDateTime.ofInstant(
                 Instant.ofEpochSecond(timestamp),
                 timeZone
-            )
+            ).withDayOfMonth(1)
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0)
+                .minusMonths(1)
+            val monthStartEpochSecond = zonedDateTime
+                .toEpochSecond()
+            val monthEndEpochSecond = zonedDateTime
+                .plusMonths(1)
+                .toEpochSecond()
+            it.hourly.subMap(monthStartEpochSecond, monthEndEpochSecond).values.sum()
+        }, { rankDetails, rank ->
+            rankDetails.monthly = max(rankDetails.monthly, rank)
+        }, {
+            Rank.monthlyRank
+        }, { rankDetails, rank ->
+            rankDetails.monthly = rank
+        })
+        Rank.yearlyRank = getRankList(videoIdsToArtistAndTitleMap, {
+            val zonedDateTime = ZonedDateTime.ofInstant(
+                Instant.ofEpochSecond(timestamp),
+                timeZone
+            ).withMonth(1)
                 .withDayOfMonth(1)
                 .withHour(0)
                 .withMinute(0)
                 .withSecond(0)
                 .withNano(0)
+                .minusYears(1)
+            val yearStartEpochSecond = zonedDateTime
                 .toEpochSecond()
-            it.hourly.tailMap(monthStartEpochSecond).values.sum()
-        }
-        Rank.yearlyRank = getRankList(videoIdsToArtistAndTitleMap) {
-            val yearStartEpochSecond = ZonedDateTime.ofInstant(
-                Instant.ofEpochSecond(timestamp),
-                timeZone
-            )
-                .withMonth(1)
-                .withDayOfMonth(1)
-                .withHour(0)
-                .withMinute(0)
-                .withSecond(0)
-                .withNano(0)
+            val yearEndEpochSecond = zonedDateTime
+                .plusYears(1)
                 .toEpochSecond()
-            it.hourly.tailMap(yearStartEpochSecond).values.sum()
-        }
+            it.hourly.subMap(yearStartEpochSecond, yearEndEpochSecond).values.sum()
+        }, { rankDetails, rank ->
+            rankDetails.yearly = max(rankDetails.yearly, rank)
+        }, {
+            Rank.yearlyRank
+        }, { rankDetails, rank ->
+            rankDetails.yearly = rank
+        })
         Rank.newRank = mutableListOf<RankItem>().apply {
             Config.newItems.asMap().forEach { (videoId, _) ->
                 val (artist, title) = videoIdsToArtistAndTitleMap[videoId] ?: return@forEach
@@ -161,6 +238,7 @@ object RankScheduler {
         updateVideoCount(timestamp)
         updateRank(timestamp)
         Config.Save.videoData()
+        Config.Save.chartData()
     }
 
     init {

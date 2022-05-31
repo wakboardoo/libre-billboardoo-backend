@@ -45,7 +45,7 @@ object Config {
         }
         writeText(Json.encodeToString(VideoData(mutableMapOf())))
     }.inputStream().buffered().use(Json::decodeFromStream)
-    val chartData: MutableMap<String, MutableMap<String, ChartDetails>> = // artist -> (title -> (chart-in-hours))
+    val chartData: MutableMap<String, MutableMap<String, ChartDetails>> = // artist -> (title -> ChartDetails)
         automationPath.resolve("chart_data.json").apply {
             if (!exists()) {
                 createFile()
@@ -92,18 +92,18 @@ object Config {
 
     @Serializable
     data class ChartDetails(
-        val chartInHours: Long,
-        val maxRank: RankDetails,
-        val lastRank: RankDetails
+        var chartInHours: Long = 0,
+        var maxRank: RankDetails = RankDetails(),
+        val previousRank: RankDetails = RankDetails()
     ) {
         @Serializable
         data class RankDetails(
-            val hourly: Int,
-            val daily: Int,
-            val weekly: Int,
-            val monthly: Int,
-            val yearly: Int,
-            val allTime: Int
+            var hourly: Int = 0,
+            var daily: Int = 0,
+            var weekly: Int = 0,
+            var monthly: Int = 0,
+            var yearly: Int = 0,
+            var allTime: Int = 0
         )
     }
 
