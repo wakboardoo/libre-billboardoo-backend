@@ -22,8 +22,8 @@ object Config {
     val settings: Settings = Path("settings.json").apply {
         if (!exists()) {
             createFile()
+            writeText(Json.encodeToString(Settings("", "")))
         }
-        writeText(Json.encodeToString(Settings("", "")))
     }.inputStream().buffered().use(Json::decodeFromStream)
     /**
      * {
@@ -36,8 +36,8 @@ object Config {
         Path("target_videos.json").apply {
             if (!exists()) {
                 createFile()
+                writeText(Json.encodeToString(mutableMapOf<String, MutableMap<String, MutableList<String>>>()))
             }
-            writeText(Json.encodeToString(mutableMapOf<String, MutableMap<String, MutableList<String>>>()))
         }.inputStream().buffered().use(Json::decodeFromStream)
     private val automationPath = Path("automation").apply {
         if (!exists()) {
@@ -47,19 +47,19 @@ object Config {
     val videoData: VideoData = automationPath.resolve("video_data.json").apply {
         if (!exists()) {
             createFile()
+            writeText(Json.encodeToString(VideoData(mutableMapOf())))
         }
-        writeText(Json.encodeToString(VideoData(mutableMapOf())))
     }.inputStream().buffered().use(Json::decodeFromStream)
     val chartData: MutableMap<String, MutableMap<String, ChartDetails>> = // artist -> (title -> ChartDetails)
         automationPath.resolve("chart_data.json").apply {
             if (!exists()) {
                 createFile()
-            }
-            writeText(
-                Json.encodeToString(
-                    mutableMapOf<String, MutableMap<String, ChartDetails>>()
+                writeText(
+                    Json.encodeToString(
+                        mutableMapOf<String, MutableMap<String, ChartDetails>>()
+                    )
                 )
-            )
+            }
         }.inputStream().buffered().use(Json::decodeFromStream)
     val newItems: Cache<String, Long> =
         CacheBuilder.newBuilder() // videoIds -> CountData

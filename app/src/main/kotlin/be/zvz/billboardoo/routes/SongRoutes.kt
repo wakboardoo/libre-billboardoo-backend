@@ -32,12 +32,22 @@ fun Route.songRouting() {
                 }
                 Config.Save.targetVideos()
                 call.respondText(
-                    gson.toJson(JsonObject().addProperty("result", true)),
+                    gson.toJson(
+                        JsonObject().apply {
+                            addProperty("result", true)
+                            addProperty("message", "Songs added")
+                        }
+                    ),
                     ContentType.Application.Json
                 )
             } else {
                 call.respondText(
-                    gson.toJson(JsonObject().addProperty("result", false)),
+                    gson.toJson(
+                        JsonObject().apply {
+                            addProperty("result", false)
+                            addProperty("message", "Invalid secret key")
+                        }
+                    ),
                     ContentType.Application.Json,
                     HttpStatusCode.Unauthorized
                 )
@@ -62,7 +72,18 @@ fun Route.songRouting() {
             limit = 30,
             timeBeforeReset = Duration.ofMinutes(1)
         ) {
-            get("/all") {
+            get("/target-videos") {
+                call.respondText(
+                    Json.encodeToString(Config.targetVideos),
+                    ContentType.Application.Json
+                )
+            }
+        }
+        rateLimited(
+            limit = 30,
+            timeBeforeReset = Duration.ofMinutes(1)
+        ) {
+            get("/chart-data") {
                 call.respondText(
                     Json.encodeToString(Config.chartData),
                     ContentType.Application.Json
