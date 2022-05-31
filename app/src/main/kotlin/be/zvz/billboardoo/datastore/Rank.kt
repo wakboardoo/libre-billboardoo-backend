@@ -1,14 +1,14 @@
 package be.zvz.billboardoo.datastore
 
-import be.zvz.billboardoo.dto.RankItem
+import be.zvz.billboardoo.dto.RankResponse
 
 object Rank {
-    var hourlyRank: List<RankItem> = emptyList()
-    var twentyFourHoursRank: List<RankItem> = emptyList()
-    var dailyRank: List<RankItem> = emptyList()
-    var weeklyRank: List<RankItem> = emptyList()
-    var monthlyRank: List<RankItem> = emptyList()
-    var yearlyRank: List<RankItem> = emptyList()
-    var allTimeRank: List<RankItem> = emptyList()
-    var newRank: List<RankItem> = emptyList()
+    var hourlyRank = RankResponse()
+    var twentyFourHoursRank = RankResponse()
+    var dailyRank = RankResponse()
+    var weeklyRank = RankResponse()
+    var monthlyRank = RankResponse()
+    var yearlyRank = RankResponse()
+    var allTimeRank = RankResponse()
+    var newRank = RankResponse()
 }

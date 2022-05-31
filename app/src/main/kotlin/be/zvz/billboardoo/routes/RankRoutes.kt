@@ -14,51 +14,49 @@ import java.time.Duration
 
 fun Route.rankRouting() {
     route("/rank") {
-        route("/now") {
-            patch("/refresh") {
-                if (call.request.header("Authorization") == Config.settings.secretKey) {
-                    RankScheduler.apply()
-                    call.respondText(
-                        JacksonUtils.mapper.writeValueAsString(
-                            JacksonUtils.mapper.createObjectNode().apply {
-                                put("result", true)
-                                put("message", "Refreshed ranks")
-                            }
-                        ),
-                        ContentType.Application.Json
-                    )
-                } else {
-                    call.respond(HttpStatusCode.Unauthorized)
-                }
+        patch("/refresh") {
+            if (call.request.header("Authorization") == Config.settings.secretKey) {
+                RankScheduler.apply()
+                call.respondText(
+                    JacksonUtils.mapper.writeValueAsString(
+                        JacksonUtils.mapper.createObjectNode().apply {
+                            put("result", true)
+                            put("message", "Refreshed ranks")
+                        }
+                    ),
+                    ContentType.Application.Json
+                )
+            } else {
+                call.respond(HttpStatusCode.Unauthorized)
             }
-            rateLimited(
-                limit = 30,
-                timeBeforeReset = Duration.ofMinutes(1)
-            ) {
-                get("/hourly") {
-                    call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.hourlyRank), ContentType.Application.Json)
-                }
-                get("/24hours") {
-                    call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.twentyFourHoursRank), ContentType.Application.Json)
-                }
-                get("/daily") {
-                    call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.dailyRank), ContentType.Application.Json)
-                }
-                get("/weekly") {
-                    call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.weeklyRank), ContentType.Application.Json)
-                }
-                get("/monthly") {
-                    call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.monthlyRank), ContentType.Application.Json)
-                }
-                get("/yearly") {
-                    call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.yearlyRank), ContentType.Application.Json)
-                }
-                get("/all-time") {
-                    call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.allTimeRank), ContentType.Application.Json)
-                }
-                get("/new") {
-                    call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.newRank), ContentType.Application.Json)
-                }
+        }
+        rateLimited(
+            limit = 30,
+            timeBeforeReset = Duration.ofMinutes(1)
+        ) {
+            get("/hourly") {
+                call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.hourlyRank), ContentType.Application.Json)
+            }
+            get("/24hours") {
+                call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.twentyFourHoursRank), ContentType.Application.Json)
+            }
+            get("/daily") {
+                call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.dailyRank), ContentType.Application.Json)
+            }
+            get("/weekly") {
+                call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.weeklyRank), ContentType.Application.Json)
+            }
+            get("/monthly") {
+                call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.monthlyRank), ContentType.Application.Json)
+            }
+            get("/yearly") {
+                call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.yearlyRank), ContentType.Application.Json)
+            }
+            get("/all-time") {
+                call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.allTimeRank), ContentType.Application.Json)
+            }
+            get("/new") {
+                call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.newRank), ContentType.Application.Json)
             }
         }
     }
