@@ -29,16 +29,21 @@ object RankScheduler {
     //  효율적이지만 예쁘지 않은 데이터 저장 방식을 사용할 것인지 고민해봐야 함
     //  일단은 전자를 사용할 예정 (몇천개 정도 element로는 크게 부담되지 않기 때문)
     private fun updateVideoCount(timestamp: Long) {
-        val list = youtube.videos().list(statisticsList)
-        list.id = Config.targetVideos.flatMap { (_, data) -> data.flatMap { (_, videoIds) -> videoIds } }
-        list.key = Config.settings.youtubeDataApiKey
-        list.execute().items.forEach { videoData ->
-            Config.videoData.viewCount[videoData.id]?.let {
-                val count = it.hourly.values.lastOrNull() ?: 0
-                it.hourly[timestamp] = videoData.statistics.viewCount.toLong() - count
-                it.allTime = count
+        Config.targetVideos.flatMap { (_, data) -> data.flatMap { (_, videoIds) -> videoIds } }
+            .chunked(50)
+            .parallelStream()
+            .forEach { chunk ->
+                val list = youtube.videos().list(statisticsList)
+                list.id = chunk
+                list.key = Config.settings.youtubeDataApiKey
+                list.execute().items.forEach { videoData ->
+                    Config.videoData.viewCount[videoData.id]?.let {
+                        val count = it.hourly.values.lastOrNull() ?: 0
+                        it.hourly[timestamp] = videoData.statistics.viewCount.toLong() - count
+                        it.allTime = count
+                    }
+                }
             }
-        }
     }
 
     private fun findArtistAndTitle(videoId: String): Pair<String, String>? {
