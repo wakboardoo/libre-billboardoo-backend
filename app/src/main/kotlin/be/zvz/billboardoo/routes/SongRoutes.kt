@@ -2,6 +2,7 @@ package be.zvz.billboardoo.routes
 
 import be.zvz.billboardoo.datastore.Config
 import be.zvz.billboardoo.dto.Song
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import guru.zoroark.ratelimit.rateLimited
 import io.ktor.http.*
@@ -13,6 +14,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.time.Duration
 
+private val gson = Gson()
 fun Route.songRouting() {
     route("/song") {
         put {
@@ -30,12 +32,12 @@ fun Route.songRouting() {
                 }
                 Config.Save.targetVideos()
                 call.respondText(
-                    JsonObject().addProperty("result", true).toString(),
+                    gson.toJson(JsonObject().addProperty("result", true)),
                     ContentType.Application.Json
                 )
             } else {
                 call.respondText(
-                    JsonObject().addProperty("result", false).toString(),
+                    gson.toJson(JsonObject().addProperty("result", false)),
                     ContentType.Application.Json,
                     HttpStatusCode.Unauthorized
                 )

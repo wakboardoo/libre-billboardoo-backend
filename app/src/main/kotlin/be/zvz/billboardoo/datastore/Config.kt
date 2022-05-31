@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.SortedMap
 import java.util.concurrent.TimeUnit
@@ -14,6 +15,10 @@ import kotlin.io.path.*
 
 @OptIn(ExperimentalSerializationApi::class)
 object Config {
+    fun init() {
+        LoggerFactory.getLogger(Config::class.java).info("Initializing config")
+    }
+
     val settings: Settings = Path("settings.json").apply {
         if (!exists()) {
             createFile()

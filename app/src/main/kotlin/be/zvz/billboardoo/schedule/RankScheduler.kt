@@ -7,6 +7,7 @@ import com.coreoz.wisp.schedule.cron.CronSchedule
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.youtube.YouTube
+import org.slf4j.LoggerFactory
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.ZonedDateTime
@@ -19,6 +20,10 @@ object RankScheduler {
         .build()
     private val statisticsList = listOf("statistics")
     private val timeZone = TimeZone.getTimeZone("Asia/Seoul").toZoneId()
+
+    fun init() {
+        LoggerFactory.getLogger(RankScheduler::class.java).info("Initializing RankScheduler")
+    }
 
     // TODO: 비효율적이지만 예쁜 데이터 저장 방법을 선택할 것인지,
     //  효율적이지만 예쁘지 않은 데이터 저장 방식을 사용할 것인지 고민해봐야 함
