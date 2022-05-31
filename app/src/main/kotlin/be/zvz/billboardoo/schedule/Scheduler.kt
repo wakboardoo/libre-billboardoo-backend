@@ -1,4 +1,4 @@
-package be.zvz.billbodoo.schedule
+package be.zvz.billboardoo.schedule
 
 import com.coreoz.wisp.Scheduler
 

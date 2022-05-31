@@ -1,7 +1,7 @@
-package be.zvz.billbodoo
+package be.zvz.billboardoo
 
-import be.zvz.billbodoo.plugins.configureRouting
-import be.zvz.billbodoo.plugins.configureSerialization
+import be.zvz.billboardoo.plugins.configureRouting
+import be.zvz.billboardoo.plugins.configureSerialization
 import io.ktor.server.application.*
 import io.ktor.server.netty.EngineMain
 

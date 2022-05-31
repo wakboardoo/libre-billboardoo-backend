@@ -1,4 +1,4 @@
-package be.zvz.billbodoo.datastore
+package be.zvz.billboardoo.datastore
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable

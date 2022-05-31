@@ -1,6 +1,6 @@
-package be.zvz.billbodoo.datastore
+package be.zvz.billboardoo.datastore
 
-import be.zvz.billbodoo.dto.RankItem
+import be.zvz.billboardoo.dto.RankItem
 
 object Rank {
     var hourlyRank: List<RankItem> = emptyList()

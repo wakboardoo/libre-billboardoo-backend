@@ -1,4 +1,4 @@
-package be.zvz.billbodoo.dto
+package be.zvz.billboardoo.dto
 
 import kotlinx.serialization.Serializable
 

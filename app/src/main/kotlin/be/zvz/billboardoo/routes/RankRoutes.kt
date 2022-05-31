@@ -1,6 +1,6 @@
-package be.zvz.billbodoo.routes
+package be.zvz.billboardoo.routes
 
-import be.zvz.billbodoo.datastore.Rank
+import be.zvz.billboardoo.datastore.Rank
 import guru.zoroark.ratelimit.rateLimited
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -10,7 +10,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.time.Duration
 
-fun Route.billbodooRouting() {
+fun Route.rankRouting() {
     rateLimited(
         limit = 30,
         timeBeforeReset = Duration.ofMinutes(1)

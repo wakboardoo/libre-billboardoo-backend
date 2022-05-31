@@ -1,4 +1,4 @@
-package be.zvz.billbodoo.plugins
+package be.zvz.billboardoo.plugins
 
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*

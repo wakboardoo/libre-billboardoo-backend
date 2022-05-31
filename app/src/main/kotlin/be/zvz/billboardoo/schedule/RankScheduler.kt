@@ -1,8 +1,8 @@
-package be.zvz.billbodoo.schedule
+package be.zvz.billboardoo.schedule
 
-import be.zvz.billbodoo.datastore.Config
-import be.zvz.billbodoo.datastore.Rank
-import be.zvz.billbodoo.dto.RankItem
+import be.zvz.billboardoo.datastore.Config
+import be.zvz.billboardoo.datastore.Rank
+import be.zvz.billboardoo.dto.RankItem
 import com.coreoz.wisp.schedule.cron.CronSchedule
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory

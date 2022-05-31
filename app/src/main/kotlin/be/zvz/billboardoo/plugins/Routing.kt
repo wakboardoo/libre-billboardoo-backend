@@ -1,11 +1,11 @@
-package be.zvz.billbodoo.plugins
+package be.zvz.billboardoo.plugins
 
-import be.zvz.billbodoo.routes.billbodooRouting
+import be.zvz.billboardoo.routes.rankRouting
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     routing {
-        billbodooRouting()
+        rankRouting()
     }
 }
