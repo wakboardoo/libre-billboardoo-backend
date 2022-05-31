@@ -68,6 +68,7 @@ object RankScheduler {
         maxRankProcessor: (Config.ChartDetails.RankDetails, Int) -> Unit,
         getPreviousRank: () -> List<RankItem>,
         previousRankProcessor: (Config.ChartDetails.RankDetails, Int) -> Unit,
+        chartInProcessor: (Config.ChartDetails.ChartInHoursDetails) -> Unit,
     ): List<RankItem> = mutableListOf<RankItem>().apply {
         getPreviousRank().forEachIndexed { index, rankItem ->
             Config.chartData[rankItem.artist]?.get(rankItem.title)?.previousRank?.let {
@@ -109,7 +110,7 @@ object RankScheduler {
                 maxRankProcessor(this, index + 1)
             }
             if (index < 100) {
-                resultChartDetails.chartInHours++
+                chartInProcessor(resultChartDetails.chartInDetails)
             }
         }
     }
@@ -128,6 +129,8 @@ object RankScheduler {
                 Rank.allTimeRank.ranking
             }, { rankDetails, rank ->
                 rankDetails.allTime = rank
+            }, {
+                it.allTime++
             })
         )
         Rank.hourlyRank = RankResponse(
@@ -140,6 +143,8 @@ object RankScheduler {
                 Rank.hourlyRank.ranking
             }, { rankDetails, rank ->
                 rankDetails.hourly = rank
+            }, {
+                it.hourly++
             })
         )
         val zonedDateTime = ZonedDateTime.ofInstant(
@@ -153,11 +158,13 @@ object RankScheduler {
                 getRankList(videoIdsToArtistAndTitleMap, {
                     it.hourly.subMap(dayStartEpochSecond, timestamp + 1).values.sum()
                 }, { rankDetails, rank ->
-                    rankDetails.twentyFourHour = max(rankDetails.twentyFourHour, rank)
+                    rankDetails.twentyFourHours = max(rankDetails.twentyFourHours, rank)
                 }, {
                     Rank.twentyFourHoursRank.ranking
                 }, { rankDetails, rank ->
-                    rankDetails.twentyFourHour = rank
+                    rankDetails.twentyFourHours = rank
+                }, {
+                    it.twentyFourHours++
                 })
             )
         }
@@ -179,6 +186,8 @@ object RankScheduler {
                         Rank.dailyRank.ranking
                     }, { rankDetails, rank ->
                         rankDetails.daily = rank
+                    }, {
+                        it.daily++
                     })
                 )
             }
@@ -202,6 +211,8 @@ object RankScheduler {
                         Rank.weeklyRank.ranking
                     }, { rankDetails, rank ->
                         rankDetails.weekly = rank
+                    }, {
+                        it.weekly++
                     })
                 )
             }
@@ -224,6 +235,8 @@ object RankScheduler {
                         Rank.monthlyRank.ranking
                     }, { rankDetails, rank ->
                         rankDetails.monthly = rank
+                    }, {
+                        it.monthly++
                     })
                 )
             }
@@ -248,6 +261,8 @@ object RankScheduler {
                         Rank.yearlyRank.ranking
                     }, { rankDetails, rank ->
                         rankDetails.yearly = rank
+                    }, {
+                        it.yearly++
                     })
                 )
             }

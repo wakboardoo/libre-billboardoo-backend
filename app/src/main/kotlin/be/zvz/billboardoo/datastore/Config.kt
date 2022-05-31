@@ -93,13 +93,22 @@ object Config {
     }
 
     data class ChartDetails(
-        var chartInHours: Long = 0,
+        var chartInDetails: ChartInHoursDetails = ChartInHoursDetails(),
         var maxRank: RankDetails = RankDetails(),
         val previousRank: RankDetails = RankDetails()
     ) {
+        data class ChartInHoursDetails(
+            var hourly: Int = 0,
+            var twentyFourHours: Int = 0,
+            var daily: Int = 0,
+            var weekly: Int = 0,
+            var monthly: Int = 0,
+            var yearly: Int = 0,
+            var allTime: Int = 0
+        )
         data class RankDetails(
             var hourly: Int = 0,
-            var twentyFourHour: Int = 0,
+            var twentyFourHours: Int = 0,
             var daily: Int = 0,
             var weekly: Int = 0,
             var monthly: Int = 0,
