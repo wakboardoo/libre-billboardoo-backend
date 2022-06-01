@@ -13,7 +13,7 @@ import java.time.DayOfWeek
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.util.TimeZone
-import kotlin.math.max
+import kotlin.math.min
 
 object RankScheduler {
     private val youtube = YouTube.Builder(NetHttpTransport(), JacksonFactory(), null)
@@ -123,7 +123,7 @@ object RankScheduler {
         Rank.allTimeRank = RankResponse(
             timestamp,
             getRankList(videoIdsToArtistAndTitleMap, Config.VideoData.CountData::allTime, { rankDetails, rank ->
-                rankDetails.allTime = max(rankDetails.allTime, rank)
+                rankDetails.allTime = min(rankDetails.allTime, rank)
             }, {
                 Rank.allTimeRank.ranking
             }, { rankDetails, rank ->
@@ -137,7 +137,7 @@ object RankScheduler {
             getRankList(videoIdsToArtistAndTitleMap, {
                 it.hourly[timestamp] ?: -1L
             }, { rankDetails, rank ->
-                rankDetails.hourly = max(rankDetails.hourly, rank)
+                rankDetails.hourly = min(rankDetails.hourly, rank)
             }, {
                 Rank.hourlyRank.ranking
             }, { rankDetails, rank ->
@@ -157,7 +157,7 @@ object RankScheduler {
                 getRankList(videoIdsToArtistAndTitleMap, {
                     it.hourly.subMap(dayStartEpochSecond, timestamp + 1).values.sum()
                 }, { rankDetails, rank ->
-                    rankDetails.twentyFourHours = max(rankDetails.twentyFourHours, rank)
+                    rankDetails.twentyFourHours = min(rankDetails.twentyFourHours, rank)
                 }, {
                     Rank.twentyFourHoursRank.ranking
                 }, { rankDetails, rank ->
@@ -180,7 +180,7 @@ object RankScheduler {
                     getRankList(videoIdsToArtistAndTitleMap, {
                         it.hourly.subMap(dayStartEpochSecond, dayEndEpochSecond).values.sum()
                     }, { rankDetails, rank ->
-                        rankDetails.daily = max(rankDetails.daily, rank)
+                        rankDetails.daily = min(rankDetails.daily, rank)
                     }, {
                         Rank.dailyRank.ranking
                     }, { rankDetails, rank ->
@@ -205,7 +205,7 @@ object RankScheduler {
                     getRankList(videoIdsToArtistAndTitleMap, {
                         it.hourly.subMap(weekStartEpochSecond, weekEndEpochSecond).values.sum()
                     }, { rankDetails, rank ->
-                        rankDetails.weekly = max(rankDetails.weekly, rank)
+                        rankDetails.weekly = min(rankDetails.weekly, rank)
                     }, {
                         Rank.weeklyRank.ranking
                     }, { rankDetails, rank ->
@@ -229,7 +229,7 @@ object RankScheduler {
                     getRankList(videoIdsToArtistAndTitleMap, {
                         it.hourly.subMap(monthStartEpochSecond, monthEndEpochSecond).values.sum()
                     }, { rankDetails, rank ->
-                        rankDetails.monthly = max(rankDetails.monthly, rank)
+                        rankDetails.monthly = min(rankDetails.monthly, rank)
                     }, {
                         Rank.monthlyRank.ranking
                     }, { rankDetails, rank ->
@@ -255,7 +255,7 @@ object RankScheduler {
                     getRankList(videoIdsToArtistAndTitleMap, {
                         it.hourly.subMap(yearStartEpochSecond, yearEndEpochSecond).values.sum()
                     }, { rankDetails, rank ->
-                        rankDetails.yearly = max(rankDetails.yearly, rank)
+                        rankDetails.yearly = min(rankDetails.yearly, rank)
                     }, {
                         Rank.yearlyRank.ranking
                     }, { rankDetails, rank ->
