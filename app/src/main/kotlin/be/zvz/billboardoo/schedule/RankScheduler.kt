@@ -39,12 +39,11 @@ object RankScheduler {
                 list.id = chunk
                 list.key = Config.settings.youtubeDataApiKey
                 list.execute().items.forEach { videoData ->
+                    val viewCount = videoData.statistics.viewCount.toLong()
                     Config.videoData.viewCount.getOrPut(videoData.id) {
-                        Config.VideoData.CountData(sortedMapOf(), 0)
+                        Config.VideoData.CountData(sortedMapOf(), viewCount)
                     }.let {
-                        val count = it.hourly.values.lastOrNull() ?: 0
-                        val viewCount = videoData.statistics.viewCount.toLong()
-                        it.hourly[timestamp] = viewCount - count
+                        it.hourly[timestamp] = viewCount - it.allTime
                         it.allTime = viewCount
                     }
                 }
