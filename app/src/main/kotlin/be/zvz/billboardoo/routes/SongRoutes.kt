@@ -3,13 +3,11 @@ package be.zvz.billboardoo.routes
 import be.zvz.billboardoo.datastore.Config
 import be.zvz.billboardoo.dto.Song
 import be.zvz.billboardoo.utils.JacksonUtils
-import guru.zoroark.ratelimit.rateLimited
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.time.Duration
 
 data class SongResponse(
     val result: Boolean,
@@ -47,42 +45,27 @@ fun Route.songRouting() {
                 )
             }
         }
-        rateLimited(
-            limit = 1000,
-            timeBeforeReset = Duration.ofMinutes(1)
-        ) {
-            get("/{artist?}/{title?}") {
-                val artist = call.parameters["artist"]
-                val title = call.parameters["title"]
-                if (artist != null && title != null) {
-                    call.respondText(
-                        Config.chartData[artist]?.get(title)?.let(JacksonUtils.mapper::writeValueAsString) ?: "{}",
-                        ContentType.Application.Json
-                    )
-                }
-            }
-        }
-        rateLimited(
-            limit = 30,
-            timeBeforeReset = Duration.ofMinutes(1)
-        ) {
-            get("/target-videos") {
+        get("/{artist?}/{title?}") {
+            val artist = call.parameters["artist"]
+            val title = call.parameters["title"]
+            if (artist != null && title != null) {
                 call.respondText(
-                    JacksonUtils.mapper.writeValueAsString(Config.targetVideos),
+                    Config.chartData[artist]?.get(title)?.let(JacksonUtils.mapper::writeValueAsString) ?: "{}",
                     ContentType.Application.Json
                 )
             }
         }
-        rateLimited(
-            limit = 30,
-            timeBeforeReset = Duration.ofMinutes(1)
-        ) {
-            get("/chart-data") {
-                call.respondText(
-                    JacksonUtils.mapper.writeValueAsString(Config.chartData),
-                    ContentType.Application.Json
-                )
-            }
+        get("/target-videos") {
+            call.respondText(
+                JacksonUtils.mapper.writeValueAsString(Config.targetVideos),
+                ContentType.Application.Json
+            )
+        }
+        get("/chart-data") {
+            call.respondText(
+                JacksonUtils.mapper.writeValueAsString(Config.chartData),
+                ContentType.Application.Json
+            )
         }
     }
 }
