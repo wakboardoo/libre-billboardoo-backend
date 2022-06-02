@@ -3,12 +3,12 @@ package be.zvz.billboardoo.datastore
 import be.zvz.billboardoo.dto.RankResponse
 
 object Rank {
-    var hourlyRank = RankResponse()
-    var twentyFourHoursRank = RankResponse()
-    var dailyRank = RankResponse()
-    var weeklyRank = RankResponse()
-    var monthlyRank = RankResponse()
-    var yearlyRank = RankResponse()
-    var allTimeRank = RankResponse()
-    var newRank = RankResponse()
+    var hourly = RankResponse()
+    var twentyFourHours = RankResponse()
+    var daily = RankResponse()
+    var weekly = RankResponse()
+    var monthly = RankResponse()
+    var yearly = RankResponse()
+    var allTime = RankResponse()
+    var new = RankResponse()
 }
