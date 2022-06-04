@@ -61,7 +61,7 @@ object Config {
                 )
             }
         }.inputStream().buffered().use(JacksonUtils.mapper::readValue)
-    val newItems: Cache<String, Long> =
+    val newItems: Cache<String, Short> =
         CacheBuilder.newBuilder() // videoIds -> CountData
             .expireAfterWrite(7, TimeUnit.DAYS)
             .build()
@@ -71,11 +71,13 @@ object Config {
             automationPath.resolve("new_items.json").apply {
                 if (!exists()) {
                     createFile()
-                    writeText(JacksonUtils.mapper.writeValueAsString(mutableMapOf<String, Long>()))
+                    writeText(JacksonUtils.mapper.writeValueAsString(listOf<String>()))
                 }
                 inputStream().buffered().use {
-                    JacksonUtils.mapper.readValue<Map<String, Long>>(it)
-                }.forEach(::put)
+                    JacksonUtils.mapper.readValue<List<String>>(it)
+                }.forEach {
+                    put(it, 0)
+                }
             }
         }
     }
@@ -145,7 +147,7 @@ object Config {
             it.write(JacksonUtils.mapper.writeValueAsString(chartData))
         }
         fun newItems() = Path("automation").resolve("new_items.json").bufferedWriter().use {
-            it.write(JacksonUtils.mapper.writeValueAsString(newItems.asMap()))
+            it.write(JacksonUtils.mapper.writeValueAsString(newItems.asMap().keys.toList()))
         }
     }
 }
