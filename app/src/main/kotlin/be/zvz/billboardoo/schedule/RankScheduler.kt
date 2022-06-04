@@ -325,6 +325,7 @@ object RankScheduler {
         updateRank(timestamp)
         Config.Save.videoData()
         Config.Save.chartData()
+        Config.Save.newItems()
     }
 
     init {
