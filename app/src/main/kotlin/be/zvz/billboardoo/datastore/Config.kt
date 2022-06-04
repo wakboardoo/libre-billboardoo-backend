@@ -66,6 +66,22 @@ object Config {
             .expireAfterWrite(7, TimeUnit.DAYS)
             .build()
 
+    init {
+        newItems.apply {
+            Path("new_items.json").apply {
+                if (!exists()) {
+                    createFile()
+                    writeText(JacksonUtils.mapper.writeValueAsString(mutableMapOf<String, Long>()))
+                }
+                inputStream().buffered().use {
+                    JacksonUtils.mapper.readValue<Map<String, Long>>(it)
+                }.forEach {
+                    put(it.key, it.value)
+                }
+            }
+        }
+    }
+
     data class Settings(
         val youtubeDataApiKey: String,
         val secretKey: String
@@ -129,6 +145,9 @@ object Config {
         }
         fun chartData() = Path("automation").resolve("chart_data.json").bufferedWriter().use {
             it.write(JacksonUtils.mapper.writeValueAsString(chartData))
+        }
+        fun newItems() = File("new_items.json").bufferedWriter().use {
+            it.write(JacksonUtils.mapper.writeValueAsString(newItems.asMap()))
         }
     }
 }
