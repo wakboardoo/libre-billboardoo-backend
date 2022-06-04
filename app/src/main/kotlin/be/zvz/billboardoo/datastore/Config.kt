@@ -75,9 +75,7 @@ object Config {
                 }
                 inputStream().buffered().use {
                     JacksonUtils.mapper.readValue<Map<String, Long>>(it)
-                }.forEach { (key, value) ->
-                    put(key, value)
-                }
+                }.forEach(::put)
             }
         }
     }
