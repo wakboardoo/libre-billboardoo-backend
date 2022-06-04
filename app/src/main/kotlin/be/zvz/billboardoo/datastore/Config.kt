@@ -68,7 +68,7 @@ object Config {
 
     init {
         newItems.apply {
-            Path("new_items.json").apply {
+            automationPath.resolve("new_items.json").apply {
                 if (!exists()) {
                     createFile()
                     writeText(JacksonUtils.mapper.writeValueAsString(mutableMapOf<String, Long>()))
@@ -144,7 +144,7 @@ object Config {
         fun chartData() = Path("automation").resolve("chart_data.json").bufferedWriter().use {
             it.write(JacksonUtils.mapper.writeValueAsString(chartData))
         }
-        fun newItems() = File("new_items.json").bufferedWriter().use {
+        fun newItems() = Path("automation").resolve("new_items.json").bufferedWriter().use {
             it.write(JacksonUtils.mapper.writeValueAsString(newItems.asMap()))
         }
     }
