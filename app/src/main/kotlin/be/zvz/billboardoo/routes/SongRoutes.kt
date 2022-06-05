@@ -24,11 +24,12 @@ fun Route.songRouting() {
                     }.getOrPut(it.title) {
                         mutableListOf()
                     }.addAll(it.videoIds)
-                    it.videoIds.forEach { videoId ->
+                    it.videoIds.firstNotNullOf { videoId ->
                         Config.newItems.put(videoId, 0)
                     }
                 }
                 Config.Save.targetVideos()
+                Config.Save.newItems()
                 call.respondText(
                     JacksonUtils.mapper.writeValueAsString(
                         SongResponse(true, "Songs added")
