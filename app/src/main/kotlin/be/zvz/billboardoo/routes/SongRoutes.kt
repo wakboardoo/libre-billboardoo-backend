@@ -24,8 +24,10 @@ fun Route.songRouting() {
                     }.getOrPut(it.title) {
                         mutableListOf()
                     }.addAll(it.videoIds)
-                    it.videoIds.firstNotNullOf { videoId ->
-                        Config.newItems.put(videoId, 0)
+                    if (!it.isOld) {
+                        it.videoIds.firstNotNullOf { videoId ->
+                            Config.newItems.put(videoId, 0)
+                        }
                     }
                 }
                 Config.Save.targetVideos()

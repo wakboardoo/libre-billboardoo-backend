@@ -6,5 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 data class Song(
     val artist: String,
     val title: String,
-    val videoIds: List<String>
+    val videoIds: List<String>,
+    val isOld: Boolean
 )
