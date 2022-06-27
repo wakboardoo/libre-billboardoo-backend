@@ -203,7 +203,9 @@ object RankScheduler {
                     )
                 }
             }
-        zonedDateTime.with(DayOfWeek.SATURDAY)
+        zonedDateTime
+            .minusWeeks(1)
+            .with(DayOfWeek.SATURDAY)
             .withHour(12)
             .withMinute(0)
             .withSecond(0)
