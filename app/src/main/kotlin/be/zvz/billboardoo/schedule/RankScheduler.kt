@@ -67,7 +67,7 @@ object RankScheduler {
         maxRankProcessor: (Config.ChartDetails.RankDetails, Int) -> Unit,
         getPreviousRank: () -> List<RankItem>,
         previousRankProcessor: (Config.ChartDetails.RankDetails, Int) -> Unit,
-        chartInProcessor: (Config.ChartDetails.ChartInHoursDetails) -> Unit,
+        chartInProcessor: (Config.ChartDetails.ChartInHoursDetails) -> Unit
     ): List<RankItem> = mutableListOf<RankItem>().apply {
         getPreviousRank().forEachIndexed { index, rankItem ->
             Config.chartData[rankItem.artist]?.get(rankItem.title)?.previousRank?.let {

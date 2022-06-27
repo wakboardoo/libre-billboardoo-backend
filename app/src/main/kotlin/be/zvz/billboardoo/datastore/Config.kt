@@ -21,6 +21,7 @@ object Config {
             writeText(JacksonUtils.mapper.writeValueAsString(Settings("", "")))
         }
     }.inputStream().buffered().use(JacksonUtils.mapper::readValue)
+
     /**
      * {
      *  "비챤": {
