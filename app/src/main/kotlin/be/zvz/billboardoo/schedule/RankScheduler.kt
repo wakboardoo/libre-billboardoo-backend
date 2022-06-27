@@ -17,7 +17,7 @@ import kotlin.math.min
 
 object RankScheduler {
     private val youtube = YouTube.Builder(NetHttpTransport(), JacksonFactory(), null)
-        .setApplicationName("BillBodoo")
+        .setApplicationName("BillBoardoo")
         .build()
     private val statisticsList = listOf("statistics")
     private val timeZone = TimeZone.getTimeZone("Asia/Seoul").toZoneId()
@@ -50,19 +50,19 @@ object RankScheduler {
             }
     }
 
-    private fun findArtistAndTitle(videoId: String): Pair<String, String>? {
-        Config.targetVideos.forEach { (artist, data) ->
-            data.forEach { (title, videoIds) ->
-                if (videoIds.contains(videoId)) {
-                    return Pair(artist, title)
+    private fun findArtistAndTitle(videoId: String): List<Pair<String, String>> =
+        mutableListOf<Pair<String, String>>().apply {
+            Config.targetVideos.forEach { (artist, data) ->
+                data.forEach { (title, videoIds) ->
+                    if (videoIds.contains(videoId)) {
+                        add(Pair(artist, title))
+                    }
                 }
             }
         }
-        return null
-    }
 
     private fun getRankList(
-        videoIdsToArtistAndTitleMap: Map<String, Pair<String, String>>,
+        videoIdsToArtistAndTitleMap: Map<String, List<Pair<String, String>>>,
         countProcessor: (Config.VideoData.CountData) -> Long,
         maxRankProcessor: (Config.ChartDetails.RankDetails, Int) -> Unit,
         getPreviousRank: () -> List<RankItem>,
@@ -75,29 +75,31 @@ object RankScheduler {
             }
         }
         Config.videoData.viewCount.forEach { (videoId, data) ->
-            val (artist, title) = videoIdsToArtistAndTitleMap[videoId] ?: return@forEach
-            val count = countProcessor(data).let {
-                if (it == -1L) {
-                    return@forEach
+            videoIdsToArtistAndTitleMap[videoId]?.forEach titleMapForEach@{ pair ->
+                val (artist, title) = pair
+                val count = countProcessor(data).let {
+                    if (it == -1L) {
+                        return@titleMapForEach
+                    } else {
+                        it
+                    }
+                }
+                val index = this.indexOfFirst { it.artist == artist && it.title == title }
+                if (index != -1) {
+                    this[index].apply {
+                        this.videoIds.add(videoId)
+                        this.count += count
+                    }
                 } else {
-                    it
-                }
-            }
-            val index = this.indexOfFirst { it.artist == artist && it.title == title }
-            if (index != -1) {
-                this[index].apply {
-                    this.videoIds.add(videoId)
-                    this.count += count
-                }
-            } else {
-                add(
-                    RankItem(
-                        videoIds = mutableListOf(videoId),
-                        artist = artist,
-                        title = title,
-                        count = count
+                    add(
+                        RankItem(
+                            videoIds = mutableListOf(videoId),
+                            artist = artist,
+                            title = title,
+                            count = count
+                        )
                     )
-                )
+                }
             }
         }
         sortByDescending(RankItem::count)
@@ -115,9 +117,12 @@ object RankScheduler {
     }
 
     internal fun updateRank(timestamp: Long) {
-        val videoIdsToArtistAndTitleMap = mutableMapOf<String, Pair<String, String>>().apply {
+        val videoIdsToArtistAndTitleMap = mutableMapOf<String, List<Pair<String, String>>>().apply {
             Config.videoData.viewCount.forEach { (videoId, _) ->
-                put(videoId, findArtistAndTitle(videoId) ?: return@forEach)
+                val list = findArtistAndTitle(videoId)
+                if (list.isNotEmpty()) {
+                    put(videoId, list)
+                }
             }
         }
         Rank.allTime = RankResponse(
@@ -299,20 +304,22 @@ object RankScheduler {
             timestamp,
             mutableListOf<RankItem>().apply {
                 Config.newItems.asMap().forEach { (videoId, _) ->
-                    val (artist, title) = videoIdsToArtistAndTitleMap[videoId] ?: return@forEach
-                    val count = Config.videoData.viewCount[videoId]?.hourly?.get(timestamp) ?: return@forEach
-                    this.find { it.artist == artist && it.title == title }?.let {
-                        it.videoIds.add(videoId)
-                        it.count += count
-                        return@forEach
-                    } ?: add(
-                        RankItem(
-                            videoIds = mutableListOf(videoId),
-                            artist = artist,
-                            title = title,
-                            count = count
+                    videoIdsToArtistAndTitleMap[videoId]?.forEach titleMapForEach@{ pair ->
+                        val (artist, title) = pair
+                        val count = Config.videoData.viewCount[videoId]?.hourly?.get(timestamp) ?: return@titleMapForEach
+                        this.find { it.artist == artist && it.title == title }?.let {
+                            it.videoIds.add(videoId)
+                            it.count += count
+                            return@titleMapForEach
+                        } ?: add(
+                            RankItem(
+                                videoIds = mutableListOf(videoId),
+                                artist = artist,
+                                title = title,
+                                count = count
+                            )
                         )
-                    )
+                    }
                 }
                 sortByDescending(RankItem::count)
             }
