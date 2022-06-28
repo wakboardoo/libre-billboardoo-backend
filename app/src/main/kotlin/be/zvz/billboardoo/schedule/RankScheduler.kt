@@ -212,7 +212,7 @@ object RankScheduler {
             .withNano(0)
             .apply {
                 if (
-                    Rank.weekly.timestamp == 0L || isAfter(
+                    Rank.weekly.timestamp == 0L || withHour(18).isAfter(
                         ZonedDateTime.ofInstant(
                             Instant.ofEpochSecond(Rank.weekly.timestamp),
                             timeZone
