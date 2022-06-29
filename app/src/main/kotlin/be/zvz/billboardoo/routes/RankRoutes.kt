@@ -34,7 +34,10 @@ object RankRoutes {
                 call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.hourly), ContentType.Application.Json)
             }
             get("/24hours") {
-                call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.twentyFourHours), ContentType.Application.Json)
+                call.respondText(
+                    JacksonUtils.mapper.writeValueAsString(Rank.twentyFourHours),
+                    ContentType.Application.Json
+                )
             }
             get("/daily") {
                 call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.daily), ContentType.Application.Json)
