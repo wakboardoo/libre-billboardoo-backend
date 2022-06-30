@@ -211,19 +211,18 @@ object RankScheduler {
             .withSecond(0)
             .withNano(0)
             .apply {
-                val tempZonedDateTime = withHour(18)
                 if (
-                    Rank.weekly.timestamp == 0L || tempZonedDateTime.isAfter(
+                    Rank.weekly.timestamp == 0L || withHour(18).isAfter(
                         ZonedDateTime.ofInstant(
                             Instant.ofEpochSecond(Rank.weekly.timestamp),
                             timeZone
-                        )
+                        ).withHour(18)
                     )
                 ) {
                     val weekStartEpochSecond = minusWeeks(1).toEpochSecond()
                     val weekEndEpochSecond = toEpochSecond()
                     Rank.weekly = RankResponse(
-                        tempZonedDateTime.toEpochSecond(),
+                        weekEndEpochSecond,
                         getRankList(videoIdsToArtistAndTitleMap, {
                             it.hourly.subMap(weekStartEpochSecond, weekEndEpochSecond).values.sum()
                         }, { rankDetails, rank ->
