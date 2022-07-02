@@ -204,23 +204,30 @@ object RankScheduler {
                 }
             }
         zonedDateTime
-            .minusWeeks(1)
             .with(DayOfWeek.SATURDAY)
             .withHour(12)
             .withMinute(0)
             .withSecond(0)
             .withNano(0)
             .apply {
+                val tempDateTime = when (zonedDateTime.dayOfWeek) {
+                    DayOfWeek.SATURDAY, DayOfWeek.SUNDAY -> {
+                        this
+                    }
+                    else -> {
+                        minusWeeks(1)
+                    }
+                }
                 if (
-                    Rank.weekly.timestamp == 0L || withHour(18).isAfter(
+                    Rank.weekly.timestamp == 0L || tempDateTime.withHour(18).isAfter(
                         ZonedDateTime.ofInstant(
                             Instant.ofEpochSecond(Rank.weekly.timestamp),
                             timeZone
                         ).withHour(18)
                     )
                 ) {
-                    val weekStartEpochSecond = minusWeeks(1).toEpochSecond()
-                    val weekEndEpochSecond = toEpochSecond()
+                    val weekStartEpochSecond = tempDateTime.minusWeeks(1).toEpochSecond()
+                    val weekEndEpochSecond = tempDateTime.toEpochSecond()
                     Rank.weekly = RankResponse(
                         weekEndEpochSecond,
                         getRankList(videoIdsToArtistAndTitleMap, {
