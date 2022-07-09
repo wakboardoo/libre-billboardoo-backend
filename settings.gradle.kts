@@ -14,5 +14,5 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-rootProject.name = "rome-dcinside-rss-feed"
+rootProject.name = "libre-billboardoo-backend"
 include("app")
