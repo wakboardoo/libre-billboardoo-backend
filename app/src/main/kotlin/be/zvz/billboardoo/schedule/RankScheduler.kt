@@ -211,7 +211,14 @@ object RankScheduler {
             .withNano(0)
             .apply {
                 val tempDateTime = when (zonedDateTime.dayOfWeek) {
-                    DayOfWeek.SATURDAY, DayOfWeek.SUNDAY -> {
+                    DayOfWeek.SATURDAY -> {
+                        if (zonedDateTime.hour < 18) {
+                            minusWeeks(1)
+                        } else {
+                            this
+                        }
+                    }
+                    DayOfWeek.SUNDAY -> {
                         this
                     }
                     else -> {
