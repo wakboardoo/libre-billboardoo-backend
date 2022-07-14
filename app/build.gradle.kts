@@ -34,7 +34,7 @@ dependencies {
 
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.11")
 
-    implementation(group = "com.google.apis", name = "google-api-services-youtube", version = "v3-rev20220628-1.32.1")
+    implementation(group = "com.google.apis", name = "google-api-services-youtube", version = "v3-rev20220711-1.32.1")
     implementation(group = "com.google.http-client", name = "google-http-client-jackson2", version = "1.42.1")
 
     implementation(group = "com.coreoz", name = "wisp", version = "2.2.2")
