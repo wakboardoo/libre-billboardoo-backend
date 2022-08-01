@@ -38,7 +38,7 @@ dependencies {
     implementation(group = "com.google.http-client", name = "google-http-client-jackson2", version = "1.42.2")
 
     implementation(group = "com.coreoz", name = "wisp", version = "2.2.2")
-    implementation(group = "com.cronutils", name = "cron-utils", version = "9.1.8")
+    implementation(group = "com.cronutils", name = "cron-utils", version = "9.2.0")
 
     implementation(group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8")
     implementation(group = "org.jetbrains.kotlin", name = "kotlin-reflect")
