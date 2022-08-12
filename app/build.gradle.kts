@@ -25,7 +25,7 @@ dependencies {
     implementation(group = "io.ktor", name = "ktor-server-netty-jvm", version = "2.0.3")
     implementation(group = "io.ktor", name = "ktor-server-content-negotiation", version = "2.0.3")
     implementation(group = "io.ktor", name = "ktor-server-forwarded-header", version = "2.0.3")
-    implementation(group = "io.ktor", name = "ktor-serialization-jackson", version = "2.0.3")
+    implementation(group = "io.ktor", name = "ktor-serialization-jackson", version = "2.1.0")
 
     implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.13.3")
     implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-blackbird", version = "2.13.3")
