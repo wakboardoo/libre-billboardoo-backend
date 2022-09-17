@@ -31,6 +31,11 @@ object SongRoutes {
                                 Config.newItems.put(videoId, 0)
                             }
                         }
+                        if (!it.isFestival) {
+                            it.videoIds.firstNotNullOf { videoId ->
+                                Config.festivalItems.add(videoId)
+                            }
+                        }
                     }
                     Config.Save.targetVideos()
                     Config.Save.newItems()

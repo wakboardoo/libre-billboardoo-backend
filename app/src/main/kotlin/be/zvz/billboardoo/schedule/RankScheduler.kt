@@ -137,6 +137,30 @@ object RankScheduler {
                 it.allTime++
             })
         )
+        Rank.festival = RankResponse(
+            timestamp,
+            mutableListOf<RankItem>().apply {
+                Config.festivalItems.forEach { videoId ->
+                    videoIdsToArtistAndTitleMap[videoId]?.forEach titleMapForEach@{ pair ->
+                        val (artist, title) = pair
+                        val count = Config.videoData.viewCount[videoId]?.allTime ?: return@titleMapForEach
+                        this.find { it.artist == artist && it.title == title }?.let {
+                            it.videoIds.add(videoId)
+                            it.count += count
+                            return@titleMapForEach
+                        } ?: add(
+                            RankItem(
+                                videoIds = mutableListOf(videoId),
+                                artist = artist,
+                                title = title,
+                                count = count
+                            )
+                        )
+                    }
+                }
+                sortByDescending(RankItem::count)
+            }
+        )
         Rank.hourly = RankResponse(
             timestamp,
             getRankList(videoIdsToArtistAndTitleMap, {
@@ -349,6 +373,7 @@ object RankScheduler {
         Config.Save.videoData()
         Config.Save.chartData()
         Config.Save.newItems()
+        Config.Save.festivalItems()
     }
 
     init {

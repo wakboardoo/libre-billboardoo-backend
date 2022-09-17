@@ -12,6 +12,7 @@ object Rank {
     var yearly = RankResponse()
     var allTime = RankResponse()
     var new = RankResponse()
+    var festival = RankResponse()
 
     fun init() {
         Config.videoData.viewCount.firstNotNullOf { (_, countData) ->

@@ -7,5 +7,6 @@ data class Song(
     val artist: String,
     val title: String,
     val videoIds: List<String>,
-    val isOld: Boolean
+    val isOld: Boolean,
+    val isFestival: Boolean = false
 )

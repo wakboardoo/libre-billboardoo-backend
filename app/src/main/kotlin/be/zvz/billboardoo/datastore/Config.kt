@@ -66,6 +66,16 @@ object Config {
         CacheBuilder.newBuilder() // videoIds -> CountData
             .expireAfterWrite(7, TimeUnit.DAYS)
             .build()
+    val festivalItems: MutableList<String> = automationPath.resolve("festival_data.json").apply {
+        if (!exists()) {
+            createFile()
+            writeText(
+                JacksonUtils.mapper.writeValueAsString(
+                    mutableListOf<String>()
+                )
+            )
+        }
+    }.inputStream().buffered().use(JacksonUtils.mapper::readValue)
 
     init {
         newItems.apply {
@@ -149,6 +159,9 @@ object Config {
         }
         fun newItems() = Path("automation").resolve("new_items.json").bufferedWriter().use {
             it.write(JacksonUtils.mapper.writeValueAsString(newItems.asMap().keys.toList()))
+        }
+        fun festivalItems() = Path("automation").resolve("festival_items.json").bufferedWriter().use {
+            it.write(JacksonUtils.mapper.writeValueAsString(festivalItems))
         }
     }
 }
