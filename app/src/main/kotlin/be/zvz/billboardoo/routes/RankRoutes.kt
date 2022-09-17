@@ -57,9 +57,6 @@ object RankRoutes {
             get("/new") {
                 call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.new), ContentType.Application.Json)
             }
-            get("/festival") {
-                call.respondText(JacksonUtils.mapper.writeValueAsString(Rank.festival), ContentType.Application.Json)
-            }
             get("/summary") {
                 call.respondText(
                     JacksonUtils.mapper.writeValueAsString(
@@ -71,8 +68,7 @@ object RankRoutes {
                             Rank.monthly.ranking.take(10),
                             Rank.yearly.ranking.take(10),
                             Rank.allTime.ranking.take(10),
-                            Rank.new.ranking.take(10),
-                            Rank.festival.ranking.take(10)
+                            Rank.new.ranking.take(10)
                         )
                     ),
                     ContentType.Application.Json

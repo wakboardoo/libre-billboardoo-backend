@@ -8,6 +8,5 @@ data class SummaryRankResponse(
     var monthly: List<RankItem>,
     var yearly: List<RankItem>,
     var allTime: List<RankItem>,
-    var new: List<RankItem>,
-    var festival: List<RankItem>
+    var new: List<RankItem>
 )
