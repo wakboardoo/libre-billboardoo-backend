@@ -6,7 +6,7 @@
         <encoder>
             <!-- Pattern -->
             <pattern>
-                %nopex[%d{HH:mm:ss.SSS,KST}] %highlight([%-5level]) [%thread] %cyan([%logger{0}]): %msg%n%ex
+                %nopex[%d{HH:mm:ss.SSS,Asia/Seoul}] %highlight([%-5level]) [%thread] %cyan([%logger{0}]): %msg%n%ex
             </pattern>
         </encoder>
     </appender>
