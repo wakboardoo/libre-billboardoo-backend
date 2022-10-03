@@ -32,7 +32,7 @@ dependencies {
 
     implementation(group = "com.github.JellyBrick", name = "ktor-rate-limit", version = "v0.0.4")
 
-    implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.4.1")
+    implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.4.3")
 
     implementation(group = "com.google.apis", name = "google-api-services-youtube", version = "v3-rev20220926-2.0.0")
     implementation(group = "com.google.http-client", name = "google-http-client-jackson2", version = "1.42.2")
