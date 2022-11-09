@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    implementation(group = "io.ktor", name = "ktor-server-core-jvm", version = "2.1.2")
+    implementation(group = "io.ktor", name = "ktor-server-core-jvm", version = "2.1.3")
     implementation(group = "io.ktor", name = "ktor-server-netty-jvm", version = "2.1.3")
     implementation(group = "io.ktor", name = "ktor-server-content-negotiation", version = "2.1.2")
     implementation(group = "io.ktor", name = "ktor-server-forwarded-header", version = "2.1.2")
