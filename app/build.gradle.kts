@@ -28,7 +28,7 @@ dependencies {
     implementation(group = "io.ktor", name = "ktor-serialization-jackson", version = "2.1.3")
 
     implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.14.1")
-    implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-blackbird", version = "2.14.0")
+    implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-blackbird", version = "2.14.1")
 
     implementation(group = "com.github.JellyBrick", name = "ktor-rate-limit", version = "v0.0.4")
 
