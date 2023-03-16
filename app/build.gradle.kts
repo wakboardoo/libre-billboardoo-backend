@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "1.8.10"
     application
 
-    id("org.jmailen.kotlinter") version "3.13.0"
+    id("org.jmailen.kotlinter") version "3.14.0"
     id("com.github.johnrengelman.shadow") version "8.1.0"
 }
 
