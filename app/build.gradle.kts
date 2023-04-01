@@ -5,7 +5,7 @@ plugins {
     application
 
     id("org.jmailen.kotlinter") version "3.14.0"
-    id("com.github.johnrengelman.shadow") version "8.1.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "be.zvz"
