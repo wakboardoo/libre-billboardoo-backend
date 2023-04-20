@@ -22,7 +22,7 @@ repositories {
 
 dependencies {
     implementation(group = "io.ktor", name = "ktor-server-core-jvm", version = "2.2.4")
-    implementation(group = "io.ktor", name = "ktor-server-netty-jvm", version = "2.2.4")
+    implementation(group = "io.ktor", name = "ktor-server-netty-jvm", version = "2.3.0")
     implementation(group = "io.ktor", name = "ktor-server-content-negotiation", version = "2.2.4")
     implementation(group = "io.ktor", name = "ktor-server-forwarded-header", version = "2.2.4")
     implementation(group = "io.ktor", name = "ktor-serialization-jackson", version = "2.2.4")
